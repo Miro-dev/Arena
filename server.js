@@ -16,14 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("./"));
 
-function start() {
-  battle(agents.R1, agents.P1);
-  res.json(Logger.getLog());
-}
-
-app.use(start());
-
-app.get("/battle", (req, res, err) => {
+app.get("/", (req, res, err) => {
   battle(agents.R1, agents.P1);
   res.json(Logger.getLog());
 });
