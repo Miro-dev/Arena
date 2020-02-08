@@ -14,13 +14,18 @@ const app = express();
 // Body parser || Static
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static("public"));
+app.use(express.static("./"));
+
+function start() {
+  battle(agents.R1, agents.P1);
+  res.json(Logger.getLog());
+}
+
+app.use(start());
 
 app.get("/battle", (req, res, err) => {
   battle(agents.R1, agents.P1);
-  // res.json({ logArray: FS2.logArray, logArrFighter: logArrFighter });
   res.json(Logger.getLog());
-  // res.json({ msg: "WAh" });
 });
 
 const PORT = process.env.PORT || 5000;
