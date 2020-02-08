@@ -20,7 +20,7 @@ $(".btn").click(function(e) {
         textarea.append(element + " \n ");
       });
       // e.preventDefault();
-      textarea.scrollTop = -1;
+      textarea.scrollTop = 999999;
     }
   };
 });
