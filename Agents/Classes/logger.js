@@ -2,7 +2,7 @@ module.exports = class Logger {
   constructor() {
     console.log("Logger Created!");
 
-    this.logArray = [];
+    this.logArray = [" "];
   }
 
   getLog() {
@@ -15,7 +15,7 @@ module.exports = class Logger {
   }
 
   clearLog() {
-    this.logArray = [];
+    this.logArray = [" "];
   }
 };
 

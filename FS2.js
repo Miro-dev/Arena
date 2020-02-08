@@ -159,7 +159,7 @@ function battleHit(Fighter1, Fighter2) {
   let hitDMG = hits.hitEffect[Object.keys(hits.hitEffect)].dmg;
 
   // Logging Inital Info <
-  Logger.push("After Checks\n");
+  Logger.push("After Checks");
 
   console.dir(hits);
   console.dir(defs);
@@ -209,7 +209,7 @@ function battleHit(Fighter1, Fighter2) {
       } else {
         Logger.push("Block Successful!");
         heal_Fighter(defs);
-        Logger.push("After Block\n");
+        Logger.push("After Block");
         conclusion({
           hits: hits,
           defs: defs,
@@ -222,7 +222,7 @@ function battleHit(Fighter1, Fighter2) {
       }
     } else {
       Logger.push("Fast Hit in for: " + hitDMG);
-      Logger.push("After FastHit\n");
+      Logger.push("After FastHit");
       conclusion({
         hits: hits,
         defs: defs,
@@ -246,7 +246,7 @@ function battleHit(Fighter1, Fighter2) {
     if (doesDefDodge) {
       if (defs.Counter) {
         Logger.push("Counter hit!");
-        Logger.push("After Counter\n");
+        Logger.push("After Counter");
         defs.effects.counter = { turnsBase: 1 };
         conclusion({
           hits: hits,
@@ -262,7 +262,7 @@ function battleHit(Fighter1, Fighter2) {
         // console.dir(defs)
       } else {
         Logger.push("Dodge!");
-        Logger.push("After Dodge\n");
+        Logger.push("After Dodge");
         conclusion({
           hits: hits,
           defs: defs,
@@ -282,7 +282,7 @@ function battleHit(Fighter1, Fighter2) {
       } else {
         if (defs.ShieldDeflect) {
           Logger.push(`Shield Deflect!`);
-          Logger.push("After Shield Deflect\n");
+          Logger.push("After Shield Deflec");
           hits.effects.shieldDeflect = defs.ShieldDeflect;
           conclusion({
             hits: hits,
@@ -319,7 +319,7 @@ function battleHit(Fighter1, Fighter2) {
           // defs.regainStance_Stamina();
           if (defs.Parry.riposte) {
             Logger.push(`Riposte!`);
-            Logger.push("After Riposte\n");
+            Logger.push("After Riposte");
             defs.effects.riposte = { turnsBase: defs.Parry.turnsBase };
             // defs.curStamina = -hitDMG/2
             // console.dir(hits)
@@ -376,7 +376,7 @@ function battleHit(Fighter1, Fighter2) {
 
       // defs.effects[Object.keys(hits.hitEffect)] = hits.hitEffect[Object.keys(hits.hitEffect)]
 
-      // Logger.push("After All\n")
+      // Logger.push("After All")
       // console.dir(hits)
       // console.dir(defs)
     }
@@ -397,7 +397,7 @@ function battle(P1, P2) {
     Logger.push(
       `${P2.name}- Health: ${P2.health}/${P2.baseHealth} & Armor: ${P2.armor} & Stamina: ${P2.curStamina}/${P2.baseStamina} & Stance: ${P2.stance}`
     );
-    Logger.push(`\nTurn: ${turn} -------------------------------------\n`);
+    Logger.push(`Turn: ${turn} -------------------------------------`);
 
     turn++;
     console.log("From battle from FS2 " + Logger);
