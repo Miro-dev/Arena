@@ -4,13 +4,12 @@
 // Fix does???Heal
 // Fix str agi from states and effects
 // Fix states changing
-
-// function testBlockShatter () {
-//     // Fix Block depletion after break to correspond to Block.block
-//     const PaladinTest = new Paladin("Test1", 11, 5, 0);
-//     const FighterTest = new Fighter("Test2", 11, 5, 0);
-//     return [PaladinTest.curStamina, PaladinTest.blockHealth, PaladinTest.health]
-// }
+function testBlockShatter () {
+    // Fix Block depletion after break to correspond to Block.block
+    const PaladinTest = new Paladin("Test1", 11, 5, 0);
+    const FighterTest = new Fighter("Test2", 11, 5, 0);
+    return [PaladinTest.curStamina, PaladinTest.blockHealth, PaladinTest.health]
+}
 
 function roundToTwo(num) {    
     // console.log("Num Rounded: " + num)
@@ -18,25 +17,24 @@ function roundToTwo(num) {
 }
 
 class Fighter {
-    constructor (name, strength, agility, armor) {
+    constructor (name, strength, agility, defense, mastery, armor) {
         // Parry and Block may not be clean
 
         // Defense of Vulnaribilities - Linked with Defense, Armor Stat, Mastery
-            // this.Vulnaribilities
-            // this.Defense = defense
-            // this.Mastery = mastery
+        this.Vulnaribilities
+        this.Defense = defense
+        this.Mastery = mastery
 
         // After Parry - effect = -Defense
 
         // Deflect = a mix between a Parry and Dodge ( attacker Out of Balance/2)
 
         // Attack Force to stop an Attack? Faint
-        // Types of attack - Powerful F3 Q3 / Medium F+2 Q-2 / Fast F+1 Q-1 / Fast Safe Probing / Faint / Block Distortion / Directed Vulnaribility Hunt
 
         // Initiatitve - increases Attack, Speed / lowers Defense, Accuracy ( gets filled after 
         //      one NOT parried attack and stopped after parry, turns around after a riposte)
 
-            // this.Initiative = 100    
+        this.Initiative = 100
         // Quickness *
         // Accuracy - vulnerability find (Crit)
         // Mastery - faint (block juke) / mistakes / parry / riposte
@@ -68,11 +66,9 @@ class Fighter {
         this.blockChance = 3
         this.blockHealth = this.str*200
 
-        this.baseStamina = this.str*120 + this.agi*90
+        this.baseStamina = this.str*120 + this.agi*50
         this.currentStamina = this.baseStamina
-        this.staminaRegen = Math.round(this.agi*10 + this.str*10)
-
-        this.staminaSkillExpenditure = 10 // this will change according to skill used
+        this.staminaRegen = Math.round(this.agi*5 + this.str*2)
 
         this.stanceStat = { multiplier: 2, sum: 0}
         this.state = false
@@ -130,7 +126,6 @@ class Fighter {
     }
 
     regainStance_Stamina () {
-        // Needs separation of StaneRegen and StaminaRegen 
         if (this.stance != 2) {
             this.stance += 0.5
             if (this.stance > 2) {
@@ -140,10 +135,9 @@ class Fighter {
         }
 
         if (this.curStamina != this.baseStamina) {
-            this.curStamina = {value: this.staminaRegen, source: "Regen"}
+            this.curStamina = this.staminaRegen
             if (this.effects.state == "Faithful!") {
-                // Why is this here?!
-                this.curStamina = {value: this.staminaRegen, source: "Regen Faithful"}
+                this.curStamina = this.staminaRegen
             }
         }
     }
@@ -160,7 +154,7 @@ class Fighter {
                 this.armor = 0
                 this.currentHealth += bleed
                 console.log("Damage done: " + bleed + " to " + this.name)
-                this.curStamina = {value: bleed*2, source: "DMG from Health"}
+                this.curStamina = bleed*2
                 this.stateRoll();
             } else {
                 this.armor -= value
@@ -184,12 +178,11 @@ class Fighter {
         return this.currentStamina
     }
 
-    set curStamina (valueObj) {
-        let value = valueObj.value
+    set curStamina (value) {
         value = Math.round(value)
         if (Math.sign(value) === -1) {
             this.currentStamina += value
-            console.log(`${value} Stamina Depleted from ${this.name} due to ${valueObj.source}.`)
+            console.log(value + " Stamina Depleted from " + this.name)
             if (this.currentStamina < 0) {
                 this.currentStamina = 0
             }
@@ -268,14 +261,14 @@ class Fighter {
             this.blockHealth = this.str*50
         } else {
             this.Block = {block: false, max: max, min: min}
-            console.log("Block false from BlockRoll of " + this.name)
+            console.log("Block false from BlockRoll")
         }
         console.log(`Chance Block of ${this.name} = ${chance} Needs >=${this.blockChance}`)
     }
 // Testing Parry functinality
     // Opponent Dependant <
     parryRoll (hits) {
-        if (this.curStamina > this.baseStamina/this.staminaSkillExpenditure) {
+        if (this.curStamina > this.baseStamina/8) {
             let parryChance = Math.round(((hits.agi + hits.str) / (this.str + this.agi)) * 10)
             let max = 20
             let min = 1
@@ -304,7 +297,7 @@ class Fighter {
         // Deflect works like opponent strikes with power and his power is used against him 
         // Connect Force with Deflect
         // Decisions when what Force to use!
-        if (this.curStamina > this.baseStamina/this.staminaSkillExpenditure) {
+        if (this.curStamina > this.baseStamina/6) {
             let deflectChance = Math.round(((hits.agi + hits.str) / (this.str + this.agi)) * 10)
             let max = 20
             let min = 1
@@ -334,7 +327,7 @@ class Fighter {
         let mix = Math.round(this.agi*3.5*this.stance);
         let max = Math.round(Math.round(mix*2));
         let min = mix;
-        if (this.curStamina > this.baseStamina / this.staminaSkillExpenditure) {
+        if (this.curStamina > this.baseStamina / 6) {
 
             let dodge = Math.round(Math.floor(Math.random() * (max - min)) + min + this.stanceStat.sum)
             
@@ -350,10 +343,10 @@ class Fighter {
         let min = Math.round(1 + this.agi*this.stance)
         let quickness = Math.floor(Math.random() * (max - min)) + min + this.stanceStat.sum
         if (this.curStamina < quickness*2) {
-            this.curStamina = {value: -quickness, source: "Quickness low Stamina"}
+            this.curStamina = -quickness
             quickness /= 2
         } else {
-            this.curStamina = {value: -quickness*2, source: "Quickness"}
+            this.curStamina = -quickness*2
         }
 
         this.Quickness = {quickness: quickness, max: max, min: min}
@@ -419,7 +412,7 @@ class Fighter {
                     case "shieldBash": 
                         if (this.effects[key].turns === undefined) {
                             // Initial Effect
-                            console.log(`${this.name} affected by ${key} BeforeEffects`)
+                            console.log(`${this.name} affected by ${key} BE`)
                             this.effects[key].turns = this.effects[key].turnsBase
                             this.effects[key].turns -= 1
                             this.stance -= 1
@@ -438,6 +431,15 @@ class Fighter {
 
                             this.effects[key].turns -= 1
                         }
+                        break;
+
+                    case "counter":
+                        if (this.effects[key].turns === undefined) {
+                            console.log(`${this.name} affected by ${key} BE`)
+                            this.stance += 1
+                            this.agi += Math.round(this.agi/5)
+                        }
+
                         break;
 
                     // case "riposte":
@@ -462,9 +464,9 @@ class Fighter {
                         if (this.effects[key].turns === undefined) {
                             // Initial Effect
                             this.stance -= 0.3
-                            console.log(`${this.name} affected by ${key} BeforeEffects`)
+                            console.log(`${this.name} affected by ${key} BE`)
                             if (this.effects[key].dmg > this.baseHealth / 2) {
-                                console.log(`${this.name} affected by ${key} Stun BeforeEffects!`)
+                                console.log(`${this.name} affected by ${key} Stun BE!`)
                                 this.str = -1
                                 this.agi = -1
                                 this.stance -= 1
@@ -480,7 +482,7 @@ class Fighter {
                             delete this.effects[key]
                         } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
                             // Standing Effect
-                            console.log("Standing Effect BeforeEffects " + key)
+                            console.log("Standing Effect BE " + key)
                         }
 
                         break;
@@ -492,7 +494,7 @@ class Fighter {
                             this.effects[key].turns = this.effects[key].turnsBase
                             this.effects[key].turns -= 1
 
-                            console.log(`${this.name} affected by ${key} BeforeEffects.`)
+                            console.log(`${this.name} affected by ${key} BE.`)
                             this.stance -= 0.5
                             this.blockMultiplier -= 0.5
                             this.blockChance += 1
@@ -516,7 +518,7 @@ class Fighter {
                     //         this.effects[key].turns = this.effects[key].turnsBase
                     //         this.effects[key].turns -= 1
 
-                    //         console.log(`${this.name} affected by ${key} BeforeEffects`)
+                    //         console.log(`${this.name} affected by ${key} BE`)
                     //         this.stance -= 0.3
                     //         this.curStamina = -this.Hit.dmg/2
 
@@ -525,7 +527,7 @@ class Fighter {
                     //         delete this.effects[key]
                     //     } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
                     //         // Standing Effect
-                    //         console.log("Standing Effect BeforeEffects " + key)
+                    //         console.log("Standing Effect BE " + key)
                     //         this.effects[key].turns -= 1
                     //     }
                     //     break;
@@ -535,7 +537,7 @@ class Fighter {
                             // Initial Effect
                             // this.effects[key].turns = this.effects[key].turnsBase
 
-                            console.log(`${this.name} affected by ${key} BeforeEffects`)
+                            console.log(`${this.name} affected by ${key} BE`)
                             if (this.stance > 1) {
                                 this.stanceStat.multiplier = 1
                             }
@@ -550,7 +552,7 @@ class Fighter {
                         //     delete this.effects[key]
                         } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
                             // Standing Effect
-                            console.log("Standing Effect BeforeEffects " + key)
+                            console.log("Standing Effect BE " + key)
                             if (this.stance > 1) {
                                 this.stanceStat.multiplier = 1
                             }
@@ -564,7 +566,7 @@ class Fighter {
                             this.effects[key].turns = this.effects[key].turnsBase
                             this.effects[key].turns -= 1
 
-                            console.log(`${this.name} affected by ${key} BeforeEffects`)
+                            console.log(`${this.name} affected by ${key} BE`)
                             if (this.stance > 1) {
                                 this.stanceStat.multiplier = 1
                             }
@@ -576,7 +578,7 @@ class Fighter {
                             this.staminaRegen /=3
                         } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
                             // Standing Effect
-                            console.log("Standing Effect BeforeEffects " + key)
+                            console.log("Standing Effect BE " + key)
                             if (this.stance > 1) {
                                 this.stanceStat.multiplier = 1
                             }
@@ -611,7 +613,7 @@ class Fighter {
                     case "shieldDeflect": 
                         if (this.effects[key].turns === undefined) {
                             // Initial Effect
-                            console.log(`${this.name} affected by ${key} AfterEffects`)
+                            console.log(`${this.name} affected by ${key} AE`)
                             this.effects[key].turns = this.effects[key].turnsBase
                             this.effects[key].turns -= 1
                             this.Dodge.dodge /= 2
@@ -642,13 +644,32 @@ class Fighter {
                         }
                         break;
 
+
+                    // case "counter":
+                    //     if (this.effects[key].turns === undefined) {
+                    //         // Initial Effect
+                    //         console.log(`${this.name} affected by ${key} AE`)
+                    //         this.effects[key].turns = this.effects[key].turnsBase
+                    //         this.effects[key].turns -= 1
+                    //         this.Dodge.dodge /= 2
+                    //         this.Quickness.quickness /= 2
+                    //     } else if (this.effects[key].turns <= 0){
+                    //         // Deleteion
+                    //         delete this.effects[key]
+                    //     } else if (this.effects[key].turns < this.effects[key].value.turnsBase) { // Add turnsBase to all Effects
+                    //         // Standing Effect
+                    //         this.effects[key].turns -= 1
+                    //     }
+
+                    //     break;
+
                     case "riposte":
                         if (this.effects[key].turns === undefined) {
                             // Initial Effect
                             this.effects[key].turns = this.effects[key].turnsBase
                             this.effects[key].turns -= 1
 
-                            console.log(`${this.name} affected by ${key} AfterEffects`)
+                            console.log(`${this.name} affected by ${key} AE`)
                             this.Accuracy.accuracy *=2
                             this.Quickness.quickness *= 2
 
@@ -657,11 +678,82 @@ class Fighter {
                             delete this.effects[key]
                         } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
                             // Standing Effect
-                            console.log("Standing Effect AfterEffects " + key)
+                            console.log("Standing Effect AE " + key)
                             this.effects[key].turns -= 1
                         }
                 
-                        break;
+                        break;;
+
+                    // case "hit":
+                    //     if (this.effects[key].turns === undefined) {
+                    //         // Initial Effect
+                    //         this.effects[key].turns = this.effects[key].turnsBase
+                    //         this.effects[key].turns -= 1
+
+                    //         console.log(`${this.name} affected by ${key} AE`)
+
+                    //     } else if (this.effects[key].turns <= 0){
+                    //         // Deleteion
+
+                    //         delete this.effects[key]
+                    //     } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
+                    //         // Standing Effect
+                    //         console.log("Standing Effect AE " + key)
+                    //         this.effects[key].turns -= 1
+                    //     }
+
+                    //     break;
+
+                    // case "blockShatter":
+
+                    //     if (this.effects[key].turns === undefined) {
+                    //         // Initial Effect
+                    //         this.effects[key].turns = this.effects[key].turnsBase
+                    //         this.effects[key].turns -= 1
+
+                    //         console.log(`${this.name} affected by ${key}.`)
+                    //         this.stance -= roundToTwo(this.effects[key].value / 150)
+                    //         this.blockMultiplier -= roundToTwo(this.effects[key].value / 100)
+                    //         this.blockChance += 2
+
+                    //     } else if (this.effects[key].turns <= 0){
+                    //         // Deleteion
+                    //         this.stance += roundToTwo(this.effects[key].value / 150) + roundToTwo(this.effects[key].value / 300)
+                    //         this.blockMultiplier += roundToTwo(this.effects[key].value/ 100) + roundToTwo(this.effects[key].value / 150)
+                    //         this.blockChance -= 1
+
+                    //         delete this.effects[key]
+                    //     } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
+                    //         // Standing Effect
+                    //         console.log("Standing Effect " + key)
+                    //         console.log(`${this.name} affected by ${key}.`)
+                    //         this.stance -= roundToTwo(this.effects[key].value / 300)
+                    //         this.blockMultiplier -= roundToTwo(this.effects[key].value / 150)
+                    //         this.blockChance -= 1
+
+                    //         this.effects[key].turns -= 1
+                    //     }
+
+                    //     break;
+
+                    // case "dodge":
+                    //     if (this.effects[key].turns === undefined) {
+                    //         // Initial Effect
+                    //         this.effects[key].turns = this.effects[key].turnsBase
+                    //         this.effects[key].turns -= 1
+
+                    //         console.log(`${this.name} affected by ${key}`)
+                    //         this.stance -= 0.4
+
+                    //     } else if (this.effects[key].turns <= 0){
+                    //         // Deleteion
+                    //         delete this.effects[key]
+                    //     } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
+                    //         // Standing Effect
+                    //         console.log("Standing Effect " + key)
+                    //         this.effects[key].turns -= 1
+                    //     }
+                    //     break;
 
                     case "gutHit":
                         if (this.effects[key].turns === undefined) {
@@ -669,7 +761,7 @@ class Fighter {
                             this.effects[key].turns = this.effects[key].turnsBase
                             this.effects[key].turns -= 1
 
-                            console.log(`${this.name} affected by ${key} AfterEffects`)
+                            console.log(`${this.name} affected by ${key} AE`)
                             this.Quickness.quickness /= 2
                             this.Dodge.dodge /= 2
 
@@ -690,30 +782,6 @@ class Fighter {
                             this.effects[key].turns -= 1
                         }
 
-                        break;
-
-                    case "counter":
-                        if (this.effects[key].turns === undefined) {
-                            // Initial Effect
-                            this.effects[key].turns = this.effects[key].turnsBase
-                            this.effects[key].turns -= 1
-
-                            console.log(`${this.name} affected by ${key} AfterEffects`)
-                            this.Accuracy.accuracy *=2
-                            this.Quickness.quickness *= 2
-                            console.log(`${this.name} dmg + ${this.Hit.dmg/2}`)
-                            this.Hit.dmg *= 1.5
-                            
-
-                        } else if (this.effects[key].turns <= 0){
-                            // Deleteion
-                            delete this.effects[key]
-                        } else if (this.effects[key].turns < this.effects[key].turnsBase) { // Add turnsBase to all Effects
-                            // Standing Effect
-                            console.log("Standing Effect AfterEffects " + key)
-                            this.effects[key].turns -= 1
-                        }
-                
                         break;
 
                     // case "exhaust":
@@ -842,7 +910,7 @@ class Rogue extends Fighter {
     constructor(name, str, agi, armor) {
         super(name, str, agi, armor);
         this.counterChance = 6
-        this.staminaSkillExpenditure = 13
+        this.staminaSkillExpenditure = 7 // this will change according to skill used
         // Skills <
         this.Crit = false
         this.Counter = false
@@ -904,7 +972,7 @@ class Rogue extends Fighter {
 
     gutHit (opponent) {
         if (this.curStamina > this.baseStamina / this.staminaSkillExpenditure) {
-            if (this.BlockJuke || this.effects.hasOwnProperty('counter')) {
+            if (this.BlockJuke || opponent.effects.hasOwnProperty('counter')) {
                 let chance = Math.floor(Math.random()*10) + this.stanceStat.sum
                 console.log(`Chance Gut Hit of ${this.name} = ${chance} Needs >=6 and ${this.BlockJuke} or ${this.Counter}`)
                 if (chance >= 6) {
@@ -913,13 +981,11 @@ class Rogue extends Fighter {
                     this.GutHit = false
                     hits.hitEffect = {}
                     hits.hitEffect.hit = hits.Hit
-                    console.log(this.name + " No chance to GutHit!")
                 }
             } else {
                 this.GutHit = false
                 hits.hitEffect = {}
                 hits.hitEffect.hit = hits.Hit
-                console.log(this.name + " No BlockJuke or Counter to GutHit!")
             }
         } else {
             this.GutHit = false
@@ -934,7 +1000,6 @@ class Boss extends Fighter {
     constructor(name, str, agi, armor) {
         super(name, str, agi, armor);
         this.counterChance = 6
-        this.staminaSkillExpenditure = 13
         // Skills <
         this.Crit = false
         this.Counter = false
@@ -1040,27 +1105,26 @@ class Boss extends Fighter {
     // Opponent Dependant >
 }
 
-// Make str and agi bigger values
-const Paladin1 = new Paladin("Bonhart", 6, 3, 1000);
-const Paladin2 = new Paladin("Misha", 8, 4, 200);
-const Paladin3 = new Paladin("Tervel", 10, 5, 300);
-const Paladin_1 = new Paladin("Mina", 6, 3, 100);
-const Paladin_2 = new Paladin("Gabriel", 8, 4, 200);
-const Paladin_3 = new Paladin("Pavel", 10, 5, 300);
+const Paladin1 = new Paladin("Bonhart", 8, 4, 100);
+const Paladin2 = new Paladin("Misha", 11, 5, 200);
+const Paladin3 = new Paladin("Tervel", 14, 6, 300);
+const Paladin1_1 = new Paladin("Mina", 8, 4, 100);
+const Paladin2_2 = new Paladin("Gabriel", 11, 5, 200);
+const Paladin3_3 = new Paladin("Pavel", 14, 6, 300);
 
-const Rogue1 = new Rogue("Artemis", 3, 6, 40);
-const Rogue2 = new Rogue("Salazar", 4, 8, 80);
-const Rogue3 = new Rogue("Mikino", 5, 10, 160);
-const Rogue_1 = new Rogue("Zelar", 3, 6, 40);
-const Rogue_2 = new Rogue("Borelius", 4, 8, 80);
-const Rogue_3 = new Rogue("Miso", 5, 10, 160);
+const Rogue1 = new Rogue("Artemis", 4, 8, 40);
+const Rogue2 = new Rogue("Salazar", 5, 11, 80);
+const Rogue3 = new Rogue("Mikino", 6, 14, 160);
+const Rogue1_1 = new Rogue("Zelar", 4, 8, 40);
+const Rogue2_2 = new Rogue("Borelius", 5, 11, 80);
+const Rogue3_2 = new Rogue("Miso", 6, 14, 160);
 
-const Fighter1 = new Fighter("Peter", 4, 4, 70);
-const Fighter2 = new Fighter("Benzen", 6, 6, 140);
-const Fighter3 = new Fighter("Col. Gurax", 8, 8, 280);
-const Fighter_1 = new Fighter("Bob", 4, 4, 70);
-const Fighter_2 = new Fighter("Joshua", 6, 6, 140);
-const Fighter_3 = new Fighter("Frederic", 8, 8, 280);
+const Fighter1 = new Fighter("Peter", 6, 6, 70);
+const Fighter2 = new Fighter("Benzen", 8, 8, 140);
+const Fighter3 = new Fighter("Col. Gurax", 11, 11, 280);
+const Fighter1_1 = new Fighter("Bob", 6, 6, 70);
+const Fighter2_2 = new Fighter("Joshua", 8, 8, 140);
+const Fighter3_3 = new Fighter("Frederic", 11, 11, 280);
 
 const Boss1 = new Boss("Mozgul", 18, 8, 400);
 const Boss2 = new Boss("Zerax", 8, 18, 200);
@@ -1088,8 +1152,8 @@ function battleHit(Fighter1, Fighter2) {
     } else if (Fighter2.Hit.dmg == 0 && Fighter1.Hit.dmg == 0) {
         Fighter2.regainStance_Stamina();
         Fighter1.regainStance_Stamina();
-        Fighter1.curStamina = {value: Fighter1.staminaRegen*3, source: "Regen Rest"}
-        Fighter2.curStamina = {value: Fighter2.staminaRegen*3, source: "Regen Rest"}
+        Fighter1.curStamina = Fighter1.staminaRegen*3
+        Fighter2.curStamina = Fighter2.staminaRegen*3
         console.log("Rest!")
         return
     } else if (Fighter1.Quickness.quickness > Fighter2.Quickness.quickness) {
@@ -1130,6 +1194,7 @@ function battleHit(Fighter1, Fighter2) {
     let hitsPercentHP = hits.basehealth * 0.5
     let defsPercentHP = defs.basehealth * 0.5
     let doesHitsHealFast = hits.baseHealth < hitsPercentHP && (hits instanceof Paladin || hits instanceof Boss)
+    let doesDefsHealFast = hits.baseHealth < defsPercentHP && (hits instanceof Paladin || hits instanceof Boss)
     
     // Checks >
 
@@ -1140,23 +1205,22 @@ function battleHit(Fighter1, Fighter2) {
             defs.Block.block = defs.Block.block / 1.5
             // blockDmg = defs.Block.block - hits.hitEffect[Object.keys(hits.hitEffect)].dmg;
             // doesBlockShatter = Math.sign(blockDmg) !== 1
-            defs.curStamina = {value: -defs.baseStamina/defs.staminaSkillExpenditure, source: "BlockJuke"}
+            defs.curStamina = -defs.baseStamina/defs.staminaSkillExpenditure
         }
         hits.crit();
         hits.gutHit(defs);
         if (hits.GutHit && hits.BlockJuke) {
             hits.hitEffect = {};
             hits.hitEffect.gutHit = hits.GutHit;
-            hits.curStamina = {value: -defs.baseStamina/defs.staminaSkillExpenditure/2, source: "GutHit"}
+            hits.curStamina = -defs.baseStamina/defs.staminaSkillExpenditure/2
             defs.Block.block = 0
             console.log("Gut Hit! Block 0")
-        } 
-        // else if (hits.GutHit) {
-        //     hits.hitEffect = {};
-        //     hits.hitEffect.gutHit = hits.GutHit;
-        //     hits.curStamina = {value: -defs.baseStamina/defs.staminaSkillExpenditure/2, source: "BlockJuke"}
-        //     // blockDmg = defs.Block.block - hits.hitEffect[Object.keys(hits.hitEffect)].dmg;
-        // }
+        } else if (hits.GutHit) {
+            hits.hitEffect = {};
+            hits.hitEffect.gutHit = hits.GutHit;
+            hits.curStamina = -defs.baseStamina/defs.staminaSkillExpenditure/2
+            // blockDmg = defs.Block.block - hits.hitEffect[Object.keys(hits.hitEffect)].dmg;
+        }
     }
 
     if (defs instanceof Rogue || defs instanceof Boss) {
@@ -1173,7 +1237,7 @@ function battleHit(Fighter1, Fighter2) {
         if (hits.ShieldBash) {
             hits.hitEffect = {};
             hits.hitEffect.shieldBash = hits.ShieldBash;
-            hits.curStamina = {value: -defs.baseStamina/defs.staminaSkillExpenditure/2, source: "ShieldBash"}
+            hits.curStamina = -defs.baseStamina/defs.staminaSkillExpenditure/2
         }
     }
     // Instances >
@@ -1189,17 +1253,17 @@ function battleHit(Fighter1, Fighter2) {
     if (isHitsFast) {
         // hitDMG /= 2
         console.log("Fast Hit!")
-        // if (hits.Quickness.quickness / 3 > defs.Quickness.quickness) {
+        if (hits.Quickness.quickness / 3 > defs.Quickness.quickness) {
             
-        //     console.log("Powerful Strike!")
-        // }
+            console.log("Powerful Strike!")
+        }
 
         if (doesHitsHealFast) {
             heal_Fighter(hits)
         } else if (defs.Block.block) {
 
             // From Hits Fast and not enough reaction time <
-            defs.Block.block = Math.round(defs.Block.block/1.2)
+            defs.Block.block = Math.round(defs.Block.block/1.5)
             console.log(`Weak Block = ${defs.Block.block} Block vs ${hitDMG} dmg`)
             // From Hits Fast and not enough reaction time >
 
@@ -1208,7 +1272,7 @@ function battleHit(Fighter1, Fighter2) {
             } else if (defs.Parry.parry && Object.keys(hits.hitEffect) == "hit" && hits.BlockJuke == false) {
                 console.log(`Fast hit Parry!`)
                 hits.effects.parry = {turnsBase: 1};
-                conclusion({defs: defs, hits: hits, operatorBH: ["/", 1.5, hitDMG] ,operatorDS: ["/", 1.5, defs.baseStamina/defs.staminaSkillExpenditure], operatorHS: ["*", 1, hitDMG], dir: true, source: "Fast Block Success!"})
+                conclusion({defs: defs, hits: hits, operatorBH: ["/", 1.5, hitDMG] ,operatorDS: ["/", 1.5, defs.baseStamina/defs.staminaSkillExpenditure], operatorHS: ["*", 1, hitDMG], dir: true})
                 // hits.curStamina = -hitDMG*2
                 // defs.blockHealth = -hitDMG/1.5;
                 return
@@ -1216,14 +1280,14 @@ function battleHit(Fighter1, Fighter2) {
                 console.log("Block Successful!")
                 heal_Fighter(defs)
                 console.log("After Block\n")
-                conclusion({hits: hits, defs: defs, hitDMG: hitDMG, operatorBH: ["*", 1, hitDMG], regain: 2, dir: true, source: "Fast Block Success!"})
+                conclusion({hits: hits, defs: defs, hitDMG: hitDMG, operatorBH: ["*", 1, hitDMG], regain: 2, dir: true})
             }
 
         } else {
             
             console.log("Fast Hit in for: " + hitDMG)
             console.log("After FastHit\n")
-            conclusion({hits: hits, defs: defs, regain: 2, hit: hitDMG, dir: true, source: "Fast Hit!"})
+            conclusion({hits: hits, defs: defs, regain: 2, hit: hitDMG, dir: true})
             // defs.health = -Math.round(Math.abs(hitDMG));
 
             // defs.effects[Object.keys(hits.hitEffect)] = hits.hitEffect[Object.keys(hits.hitEffect)]
@@ -1242,14 +1306,14 @@ function battleHit(Fighter1, Fighter2) {
                 console.log("Counter hit!")
                 console.log("After Counter\n")
                 defs.effects.counter = {turnsBase: 1}
-                conclusion({hits: hits, defs: defs, hitDMG: hitDMG, operatorHS: ["*", 1, hitDMG], operatorDS: ["*", 1, defs.baseStamina/defs.staminaSkillExpenditure], dir: true, source: "Counter!"})
+                conclusion({hits: hits, defs: defs, hitDMG: hitDMG, operatorHS: ["*", 1, hitDMG], operatorDS: ["*", 1, defs.baseStamina/defs.staminaSkillExpenditure], dir: true})
                 // defs.curStamina = -defs.baseStamina/defs.staminaSkillExpenditure
                 // console.dir(hits)
                 // console.dir(defs)
             } else {
                 console.log("Dodge!")
                 console.log("After Dodge\n")
-                conclusion({hits: hits, defs: defs, hitDMG: hitDMG, operatorHS: ["*", 1.5, hitDMG], operatorDS: ["*", 1, hitDMG], dir: true, source: "Dodge!"})
+                conclusion({hits: hits, defs: defs, hitDMG: hitDMG, operatorHS: ["*", 1.5, hitDMG], operatorDS: ["*", 1, hitDMG], dir: true})
                 // hits.curStamina = -hitDMG
                 // defs.curStamina = -defs.baseStamina/defs.staminaSkillExpenditure
     
@@ -1264,7 +1328,7 @@ function battleHit(Fighter1, Fighter2) {
                     console.log(`Shield Deflect!`)
                     console.log("After Shield Deflect\n")
                     hits.effects.shieldDeflect = defs.ShieldDeflect
-                    conclusion({hits: hits, defs: defs, operatorHS: ["/", 2, hitDMG], operatorDS: ["*", 1, defs.baseStamina/defs.staminaSkillExpenditure], operatorBH: ["/", 2, hitDMG], dir: true, source: "Shield Deflect!"})
+                    conclusion({hits: hits, defs: defs, operatorHS: ["/", 2, hitDMG], operatorDS: ["*", 1, defs.baseStamina/defs.staminaSkillExpenditure], operatorBH: ["/", 2, hitDMG], dir: true})
                     // hits.curStamina = -hitDMG/2
                     // defs.curStamina = -defs.baseStamina/defs.staminaSkillExpenditure
                     // defs.blockHealth = -hitDMG/2;
@@ -1290,10 +1354,10 @@ function battleHit(Fighter1, Fighter2) {
                         // console.dir(hits)
                         // console.dir(defs)
                     }
-                    conclusion({defs: defs, hits: hits, operatorBH: ["/", 1.5, hitDMG] ,operatorDS: ["/", 2, defs.baseStamina/defs.staminaSkillExpenditure], operatorHS: ["*", 1.5, hitDMG], dir: true, heal: defs, source: "Riposte!"})
+                    conclusion({defs: defs, hits: hits, operatorBH: ["/", 1.5, hitDMG] ,operatorDS: ["/", 2, defs.baseStamina/defs.staminaSkillExpenditure], operatorHS: ["*", 1.5, hitDMG], dir: true, heal: defs})
                 } else {
                     console.log("Block Successful!")
-                    conclusion({hits: hits, defs: defs, operatorHS: ["/", 1, hitDMG], operatorDS: ["/", 2, hitDMG], operatorBH: ["/", 1, hitDMG], dir: true, regain: 2, heal: defs, source: "Block Success!"})
+                    conclusion({hits: hits, defs: defs, operatorHS: ["/", 1, hitDMG], operatorDS: ["/", 2, hitDMG], operatorBH: ["/", 1, hitDMG], dir: true, regain: 2, heal: defs})
                     // hits.curStamina = -hitDMG
                     // defs.curStamina = -hitDMG/2
                     // defs.blockHealth = -hitDMG;
@@ -1339,10 +1403,10 @@ function battle (P1, P2) {
 function heal_Fighter(f1) {
     if (f1.Heal) {
         console.log("Heal to " + f1.name + " + " + f1.str*f1.stance*5 + " HP/Stamina")
-        f1.curStamina = {value: -Math.round(f1.baseStamina / f1.staminaSkillExpenditure), source: "Heal Spell"}
+        f1.curStamina = -Math.round(f1.baseStamina / f1.staminaSkillExpenditure)
         f1.health = f1.str*f1.stance*5;
         f1.stance += 0.5;
-        f1.curStamina = {value: f1.str*f1.stance*5, source: "Heal amount"}
+        f1.curStamina = f1.str*f1.stance*5;
 
     }
 }
@@ -1355,17 +1419,17 @@ function conclusion (obj) {
 
     if (obj.operatorHS) {
         if (obj.operatorHS[0] == "*") {
-            obj.hits.curStamina = {value: -Math.abs(obj.operatorHS[2]*obj.operatorHS[1]), source: obj.source}
+            obj.hits.curStamina = -Math.abs(obj.operatorHS[2]*obj.operatorHS[1])
         } else {
-            obj.hits.curStamina = {value: -Math.abs(obj.operatorHS[2]/obj.operatorHS[1]), source: obj.source}
+            obj.hits.curStamina = -Math.abs(obj.operatorHS[2]/obj.operatorHS[1])
         }
     }
 
     if (obj.operatorDS) {
         if (obj.operatorDS[0] == "*") {
-            obj.defs.curStamina = {value: -Math.abs(obj.operatorDS[2]*obj.operatorDS[1]), source: obj.source}
+            obj.defs.curStamina = -Math.abs(obj.operatorDS[2]*obj.operatorDS[1])
         } else {
-            obj.defs.curStamina = {value: -Math.abs(obj.operatorDS[2]/obj.operatorDS[1]), source: obj.source}
+            obj.defs.curStamina = -Math.abs(obj.operatorDS[2]/obj.operatorDS[1])
         }
     }
 
@@ -1445,7 +1509,7 @@ function blockShatter (defs, hitDMG) {
     }
 
     console.log(`S ${Math.max(...biggestToStamina)} || BH ${Math.max(...biggestToBlockHealth)} || H ${Math.max(...biggestToHealth)}`)
-    defs.curStamina = {value: -Math.max(...biggestToStamina), source: "Block Shatter"}
+    defs.curStamina = -Math.max(...biggestToStamina)
     defs.blockHealth -= Math.max(...biggestToBlockHealth)
     defs.health = -Math.max(...biggestToHealth)
 
@@ -1466,3 +1530,31 @@ function battleTest (P1, P2) {
         turn++
     }
 }
+
+// battleTest (Rogue2, Paladin2);
+
+// battle(Rogue2, Paladin2);
+
+        // if ( P1.health < 0 && key != 0) {
+        //     console.log("A new Challenger! \n" + key)
+        //     switch (key) {
+        //         case 1:
+        //             P1 = Rogue3
+        //             break;
+
+        //         case 2:
+        //             P1 = Paladin3
+        //             break;
+
+        //         case 3:
+        //             P1 = Fighter3
+        //             break;
+            
+        //         default:
+        //             break;
+        //     }
+        //     turn = 0
+        //     key--
+        // }
+
+        // In switch use [key]

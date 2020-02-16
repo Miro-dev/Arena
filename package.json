@@ -1,26 +1,23 @@
 {
   "name": "arena",
   "version": "1.0.0",
-  "main": "server.js",
+  "description": "",
+  "main": "FightSystem.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
     "argparse": "^1.0.10",
     "chai": "^4.2.0",
-    "express": "^4.17.1",
     "semver": "^5.7.1",
     "set-blocking": "^2.0.0",
     "sprintf-js": "^1.0.3"
   },
   "devDependencies": {
-    "mocha": "^6.2.2",
-    "nodemon": "^2.0.2"
+    "mocha": "^6.2.2"
   },
   "scripts": {
-    "test": "test",
-    "start": "node server.js",
-    "fight": "nodemon server.js"
+    "test": "mocha || true"
   },
   "repository": {
     "type": "git",
@@ -31,6 +28,5 @@
   "bugs": {
     "url": "https://github.com/Miro-dev/Private-Projects/issues"
   },
-  "homepage": "https://github.com/Miro-dev/Private-Projects#readme",
-  "description": ""
+  "homepage": "https://github.com/Miro-dev/Private-Projects#readme"
 }
